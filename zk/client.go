@@ -3,6 +3,7 @@ package zk
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/shoothzj/gox/buffer"
 	"net"
 	"sync"
 )
@@ -29,14 +30,8 @@ type ZookeeperClient struct {
 	conn         net.Conn
 	eventsChan   chan *sendRequest
 	pendingQueue chan *sendRequest
-	buffer       *buffer
+	buffer       *buffer.Buffer
 	closeCh      chan struct{}
-}
-
-type buffer struct {
-	max    int
-	bytes  []byte
-	cursor int
 }
 
 func (z *ZookeeperClient) Connect(req *ConnectReq) (*ConnectResp, error) {
@@ -149,7 +144,7 @@ func (z *ZookeeperClient) Send(bytes []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result[4:], nil
+	return result, nil
 }
 
 func (z *ZookeeperClient) sendAsync(bytes []byte, callback func([]byte, error)) {
@@ -164,28 +159,46 @@ func (z *ZookeeperClient) read() {
 	for {
 		select {
 		case req := <-z.pendingQueue:
-			n, err := z.conn.Read(z.buffer.bytes[z.buffer.cursor:])
+			n, err := z.conn.Read(z.buffer.WritableSlice())
 			if err != nil {
 				req.callback(nil, err)
 				z.closeCh <- struct{}{}
 				break
 			}
-			z.buffer.cursor += n
-			if z.buffer.cursor < 4 {
+			err = z.buffer.AdjustWriteCursor(n)
+			if err != nil {
+				req.callback(nil, err)
+				z.closeCh <- struct{}{}
+				break
+			}
+			if z.buffer.Size() < 4 {
 				continue
 			}
-			length := int(z.buffer.bytes[3]) | int(z.buffer.bytes[2])<<8 | int(z.buffer.bytes[1])<<16 | int(z.buffer.bytes[0])<<24 + 4
-			if z.buffer.cursor < length {
+			bytes := make([]byte, 4)
+			err = z.buffer.ReadExactly(bytes)
+			if err != nil {
+				req.callback(nil, err)
+				z.closeCh <- struct{}{}
+				break
+			}
+			length := int(bytes[3]) | int(bytes[2])<<8 | int(bytes[1])<<16 | int(bytes[0])<<24
+			if z.buffer.Size() < length {
 				continue
 			}
-			if length > z.buffer.max {
+			// in case ddos attack
+			if length > z.buffer.Capacity() {
 				req.callback(nil, fmt.Errorf("response length %d is too large", length))
 				z.closeCh <- struct{}{}
 				break
 			}
-			req.callback(z.buffer.bytes[:length], nil)
-			z.buffer.cursor -= length
-			copy(z.buffer.bytes[:z.buffer.cursor], z.buffer.bytes[length:])
+			data := make([]byte, length)
+			err = z.buffer.ReadExactly(data)
+			if err != nil {
+				req.callback(nil, err)
+				z.closeCh <- struct{}{}
+				break
+			}
+			req.callback(data, nil)
 		case <-z.closeCh:
 			return
 		}
@@ -245,11 +258,7 @@ func NewClient(config ZookeeperClientConfig) (*ZookeeperClient, error) {
 	z.conn = conn
 	z.eventsChan = make(chan *sendRequest, config.SendQueueSize)
 	z.pendingQueue = make(chan *sendRequest, config.PendingQueueSize)
-	z.buffer = &buffer{
-		max:    config.BufferMax,
-		bytes:  make([]byte, config.BufferMax),
-		cursor: 0,
-	}
+	z.buffer = buffer.NewBuffer(config.BufferMax)
 	z.closeCh = make(chan struct{})
 	go func() {
 		z.read()
