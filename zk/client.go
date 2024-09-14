@@ -4,21 +4,17 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/shoothzj/gox/buffer"
+	"github.com/shoothzj/gox/netx"
 	"net"
 	"sync"
 )
 
 type Config struct {
-	Host             string
-	Port             int
+	Address          netx.Address
 	BufferMax        int
 	SendQueueSize    int
 	PendingQueueSize int
-	TLSConfig        *tls.Config
-}
-
-func (z Config) addr() string {
-	return fmt.Sprintf("%s:%d", z.Host, z.Port)
+	TlsConfig        *tls.Config
 }
 
 type sendRequest struct {
@@ -236,10 +232,10 @@ func NewClient(config Config) (*Client, error) {
 	var conn net.Conn
 	var err error
 
-	if config.TLSConfig == nil {
-		conn, err = net.Dial("tcp", config.addr())
+	if config.TlsConfig == nil {
+		conn, err = net.Dial("tcp", config.Address.Addr())
 	} else {
-		conn, err = tls.Dial("tcp", config.addr(), config.TLSConfig)
+		conn, err = tls.Dial("tcp", config.Address.Addr(), config.TlsConfig)
 	}
 
 	if err != nil {
