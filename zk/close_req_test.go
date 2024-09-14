@@ -1,12 +1,13 @@
 package zk
 
 import (
+	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeCloseReq(t *testing.T) {
-	bytes := testHex2Bytes(t, "00000003fffffff5")
+	bytes := testx.Hex2Bytes(t, "00000003fffffff5")
 	req, err := DecodeCloseReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 3, req.TransactionId)
@@ -19,5 +20,5 @@ func TestEncodeCloseReq(t *testing.T) {
 		OpCode:        OP_CLOSE_SESSION,
 	}
 	bytes := req.Bytes(false)
-	assert.Equal(t, testHex2Bytes(t, "00000003fffffff5"), bytes)
+	assert.Equal(t, testx.Hex2Bytes(t, "00000003fffffff5"), bytes)
 }

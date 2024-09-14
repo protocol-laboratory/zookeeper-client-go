@@ -1,12 +1,13 @@
 package zk
 
 import (
+	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeDeleteReq(t *testing.T) {
-	bytes := testHex2Bytes(t, "00000001000000020000000c2f7a6b2d6e6f74666f756e6400000000")
+	bytes := testx.Hex2Bytes(t, "00000001000000020000000c2f7a6b2d6e6f74666f756e6400000000")
 	req, err := DecodeDeleteReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, req.TransactionId)
@@ -23,5 +24,5 @@ func TestEncodeDeleteReq(t *testing.T) {
 		Version:       0,
 	}
 	bytes := req.Bytes(false)
-	assert.Equal(t, testHex2Bytes(t, "00000001000000020000000c2f7a6b2d6e6f74666f756e6400000000"), bytes)
+	assert.Equal(t, testx.Hex2Bytes(t, "00000001000000020000000c2f7a6b2d6e6f74666f756e6400000000"), bytes)
 }
