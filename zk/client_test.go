@@ -1,20 +1,22 @@
 package zk
 
 import (
+	"github.com/shoothzj/gox/netx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestCliConnect(t *testing.T) {
-	ZkClientConfig := Config{
-		Host: "localhost",
-		Port: 2181,
+	config := Config{
+		Address: netx.Address{
+			Host: "localhost",
+			Port: 2181,
+		},
 	}
-	zknetClient, err := NewClient(ZkClientConfig)
-	if err != nil {
-		t.Error(err)
-	}
-	defer zknetClient.Close()
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	defer client.Close()
 	req := &ConnectReq{
 		ProtocolVersion: 0,
 		LastZxidSeen:    0,
@@ -23,9 +25,7 @@ func TestCliConnect(t *testing.T) {
 		Password:        PasswordEmpty,
 		ReadOnly:        false,
 	}
-	resp, err := zknetClient.Connect(req)
-	if err != nil {
-		t.Fatal(err)
-	}
+	resp, err := client.Connect(req)
+	require.Nil(t, err)
 	assert.NotNil(t, resp)
 }
