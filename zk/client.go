@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-type ZookeeperClientConfig struct {
+type Config struct {
 	Host             string
 	Port             int
 	BufferMax        int
@@ -17,7 +17,7 @@ type ZookeeperClientConfig struct {
 	TLSConfig        *tls.Config
 }
 
-func (z ZookeeperClientConfig) addr() string {
+func (z Config) addr() string {
 	return fmt.Sprintf("%s:%d", z.Host, z.Port)
 }
 
@@ -26,7 +26,7 @@ type sendRequest struct {
 	callback func([]byte, error)
 }
 
-type ZookeeperClient struct {
+type Client struct {
 	conn         net.Conn
 	eventsChan   chan *sendRequest
 	pendingQueue chan *sendRequest
@@ -34,7 +34,7 @@ type ZookeeperClient struct {
 	closeCh      chan struct{}
 }
 
-func (z *ZookeeperClient) Connect(req *ConnectReq) (*ConnectResp, error) {
+func (z *Client) Connect(req *ConnectReq) (*ConnectResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (z *ZookeeperClient) Connect(req *ConnectReq) (*ConnectResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) Create(req *CreateReq) (*CreateResp, error) {
+func (z *Client) Create(req *CreateReq) (*CreateResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (z *ZookeeperClient) Create(req *CreateReq) (*CreateResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) Delete(req *DeleteReq) (*DeleteResp, error) {
+func (z *Client) Delete(req *DeleteReq) (*DeleteResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (z *ZookeeperClient) Delete(req *DeleteReq) (*DeleteResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) Exists(req *ExistsReq) (*ExistsResp, error) {
+func (z *Client) Exists(req *ExistsReq) (*ExistsResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (z *ZookeeperClient) Exists(req *ExistsReq) (*ExistsResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) GetData(req *GetDataReq) (*GetDataResp, error) {
+func (z *Client) GetData(req *GetDataReq) (*GetDataResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (z *ZookeeperClient) GetData(req *GetDataReq) (*GetDataResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) SetData(req *SetDataReq) (*SetDataResp, error) {
+func (z *Client) SetData(req *SetDataReq) (*SetDataResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (z *ZookeeperClient) SetData(req *SetDataReq) (*SetDataResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) GetChildren(req *GetChildrenReq) (*GetChildrenResp, error) {
+func (z *Client) GetChildren(req *GetChildrenReq) (*GetChildrenResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (z *ZookeeperClient) GetChildren(req *GetChildrenReq) (*GetChildrenResp, er
 	return resp, nil
 }
 
-func (z *ZookeeperClient) CloseSession(req *CloseReq) (*CloseResp, error) {
+func (z *Client) CloseSession(req *CloseReq) (*CloseResp, error) {
 	bytes, err := z.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (z *ZookeeperClient) CloseSession(req *CloseReq) (*CloseResp, error) {
 	return resp, nil
 }
 
-func (z *ZookeeperClient) Send(bytes []byte) ([]byte, error) {
+func (z *Client) Send(bytes []byte) ([]byte, error) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	var result []byte
@@ -147,7 +147,7 @@ func (z *ZookeeperClient) Send(bytes []byte) ([]byte, error) {
 	return result, nil
 }
 
-func (z *ZookeeperClient) sendAsync(bytes []byte, callback func([]byte, error)) {
+func (z *Client) sendAsync(bytes []byte, callback func([]byte, error)) {
 	sr := &sendRequest{
 		bytes:    bytes,
 		callback: callback,
@@ -155,7 +155,7 @@ func (z *ZookeeperClient) sendAsync(bytes []byte, callback func([]byte, error)) 
 	z.eventsChan <- sr
 }
 
-func (z *ZookeeperClient) read() {
+func (z *Client) read() {
 	for {
 		select {
 		case req := <-z.pendingQueue:
@@ -205,7 +205,7 @@ func (z *ZookeeperClient) read() {
 	}
 }
 
-func (z *ZookeeperClient) write() {
+func (z *Client) write() {
 	for {
 		select {
 		case req := <-z.eventsChan:
@@ -227,12 +227,12 @@ func (z *ZookeeperClient) write() {
 	}
 }
 
-func (z *ZookeeperClient) Close() {
+func (z *Client) Close() {
 	_ = z.conn.Close()
 	z.closeCh <- struct{}{}
 }
 
-func NewClient(config ZookeeperClientConfig) (*ZookeeperClient, error) {
+func NewClient(config Config) (*Client, error) {
 	var conn net.Conn
 	var err error
 
@@ -254,7 +254,7 @@ func NewClient(config ZookeeperClientConfig) (*ZookeeperClient, error) {
 	if config.BufferMax == 0 {
 		config.BufferMax = 512 * 1024
 	}
-	z := &ZookeeperClient{}
+	z := &Client{}
 	z.conn = conn
 	z.eventsChan = make(chan *sendRequest, config.SendQueueSize)
 	z.pendingQueue = make(chan *sendRequest, config.PendingQueueSize)
