@@ -6,7 +6,7 @@ import (
 )
 
 func TestCliConnect(t *testing.T) {
-	ZkClientConfig := ZookeeperClientConfig{
+	ZkClientConfig := Config{
 		Host: "localhost",
 		Port: 2181,
 	}
