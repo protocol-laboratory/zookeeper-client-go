@@ -172,6 +172,7 @@ func (z *Client) read() {
 			}
 			bytes := make([]byte, 4)
 			err = z.buffer.ReadExactly(bytes)
+			z.buffer.Compact()
 			if err != nil {
 				req.callback(nil, err)
 				z.closeCh <- struct{}{}
@@ -194,6 +195,7 @@ func (z *Client) read() {
 				z.closeCh <- struct{}{}
 				break
 			}
+			z.buffer.Compact()
 			req.callback(data, nil)
 		case <-z.closeCh:
 			return
