@@ -7,123 +7,99 @@ import (
 	"github.com/shoothzj/gox/netx"
 	"net"
 	"sync"
+	"sync/atomic"
+	"time"
 )
 
 type Config struct {
 	Address          netx.Address
-	BufferMax        int
 	SendQueueSize    int
 	PendingQueueSize int
+	BufferMax        int
+	Timeout          time.Duration
 	TlsConfig        *tls.Config
 }
 
-type sendRequest struct {
-	bytes    []byte
-	callback func([]byte, error)
-}
-
 type Client struct {
+	config       *Config
+	client       *ProtocolClient
 	conn         net.Conn
 	eventsChan   chan *sendRequest
 	pendingQueue chan *sendRequest
 	buffer       *buffer.Buffer
 	closeCh      chan struct{}
+
+	transactionId atomic.Int32
 }
 
-func (c *Client) Connect(req *ConnectReq) (*ConnectResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeConnectResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) Create(path string, data []byte, permissions []int, scheme string, credentials string, flags int) (*CreateResp, error) {
+	req := &CreateReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_CREATE
+	req.Path = path
+	req.Data = data
+	req.Permissions = permissions
+	req.Scheme = scheme
+	req.Credentials = credentials
+	req.Flags = flags
+	return c.client.Create(req)
 }
 
-func (c *Client) Create(req *CreateReq) (*CreateResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeCreateResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) Delete(path string, version int) (*DeleteResp, error) {
+	req := &DeleteReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_DELETE
+	req.Path = path
+	req.Version = version
+	return c.client.Delete(req)
 }
 
-func (c *Client) Delete(req *DeleteReq) (*DeleteResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeDeleteResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) Exists(path string) (*ExistsResp, error) {
+	req := &ExistsReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_EXISTS
+	req.Path = path
+	req.Watch = false
+	return c.client.Exists(req)
 }
 
-func (c *Client) Exists(req *ExistsReq) (*ExistsResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeExistsResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) GetData(path string) (*GetDataResp, error) {
+	req := &GetDataReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_GET_DATA
+	req.Path = path
+	req.Watch = false
+	return c.client.GetData(req)
 }
 
-func (c *Client) GetData(req *GetDataReq) (*GetDataResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeGetDataResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) SetData(path string, data []byte, version int) (*SetDataResp, error) {
+	req := &SetDataReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_SET_DATA
+	req.Path = path
+	req.Data = data
+	req.Version = version
+	return c.client.SetData(req)
 }
 
-func (c *Client) SetData(req *SetDataReq) (*SetDataResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeSetDataResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) GetChildren(path string) (*GetChildrenResp, error) {
+	req := &GetChildrenReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_GET_CHILDREN
+	req.Path = path
+	req.Watch = false
+	return c.client.GetChildren(req)
 }
 
-func (c *Client) GetChildren(req *GetChildrenReq) (*GetChildrenResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeGetChildrenResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) CloseSession() (*CloseResp, error) {
+	req := &CloseReq{}
+	req.TransactionId = c.nextTransactionId()
+	req.OpCode = OP_CLOSE_SESSION
+	return c.client.CloseSession(req)
 }
 
-func (c *Client) CloseSession(req *CloseReq) (*CloseResp, error) {
-	bytes, err := c.Send(req.Bytes(true))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := DecodeCloseResp(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (c *Client) nextTransactionId() int {
+	return int(c.transactionId.Add(1))
 }
 
 func (c *Client) Send(bytes []byte) ([]byte, error) {
@@ -226,16 +202,10 @@ func (c *Client) write() {
 }
 
 func (c *Client) Close() {
-	_ = c.conn.Close()
-	c.closeCh <- struct{}{}
+	c.client.Close()
 }
 
-func NewClient(config Config) (*Client, error) {
-	conn, err := netx.Dial(config.Address, config.TlsConfig)
-
-	if err != nil {
-		return nil, err
-	}
+func NewClient(config *Config) (*Client, error) {
 	if config.SendQueueSize == 0 {
 		config.SendQueueSize = 1000
 	}
@@ -245,18 +215,28 @@ func NewClient(config Config) (*Client, error) {
 	if config.BufferMax == 0 {
 		config.BufferMax = 512 * 1024
 	}
-	client := &Client{
-		conn:         conn,
-		eventsChan:   make(chan *sendRequest, config.SendQueueSize),
-		pendingQueue: make(chan *sendRequest, config.PendingQueueSize),
-		buffer:       buffer.NewBuffer(config.BufferMax),
-		closeCh:      make(chan struct{}),
+
+	protocolClient, err := NewProtocolClient(config.Address, config)
+	if err != nil {
+		return nil, err
 	}
-	go func() {
-		client.read()
-	}()
-	go func() {
-		client.write()
-	}()
+
+	_, err = protocolClient.Connect(&ConnectReq{
+		ProtocolVersion: 0,
+		LastZxidSeen:    0,
+		Timeout:         int(config.Timeout.Milliseconds()),
+		SessionId:       0,
+		Password:        PasswordEmpty,
+		ReadOnly:        false,
+	})
+	if err != nil {
+		protocolClient.Close()
+		return nil, err
+	}
+
+	client := &Client{
+		config: config,
+		client: protocolClient,
+	}
 	return client, nil
 }
