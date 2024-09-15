@@ -30,8 +30,8 @@ type Client struct {
 	closeCh      chan struct{}
 }
 
-func (z *Client) Connect(req *ConnectReq) (*ConnectResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) Connect(req *ConnectReq) (*ConnectResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func (z *Client) Connect(req *ConnectReq) (*ConnectResp, error) {
 	return resp, nil
 }
 
-func (z *Client) Create(req *CreateReq) (*CreateResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) Create(req *CreateReq) (*CreateResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +54,8 @@ func (z *Client) Create(req *CreateReq) (*CreateResp, error) {
 	return resp, nil
 }
 
-func (z *Client) Delete(req *DeleteReq) (*DeleteResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) Delete(req *DeleteReq) (*DeleteResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +66,8 @@ func (z *Client) Delete(req *DeleteReq) (*DeleteResp, error) {
 	return resp, nil
 }
 
-func (z *Client) Exists(req *ExistsReq) (*ExistsResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) Exists(req *ExistsReq) (*ExistsResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +78,8 @@ func (z *Client) Exists(req *ExistsReq) (*ExistsResp, error) {
 	return resp, nil
 }
 
-func (z *Client) GetData(req *GetDataReq) (*GetDataResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) GetData(req *GetDataReq) (*GetDataResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +90,8 @@ func (z *Client) GetData(req *GetDataReq) (*GetDataResp, error) {
 	return resp, nil
 }
 
-func (z *Client) SetData(req *SetDataReq) (*SetDataResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) SetData(req *SetDataReq) (*SetDataResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +102,8 @@ func (z *Client) SetData(req *SetDataReq) (*SetDataResp, error) {
 	return resp, nil
 }
 
-func (z *Client) GetChildren(req *GetChildrenReq) (*GetChildrenResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) GetChildren(req *GetChildrenReq) (*GetChildrenResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +114,8 @@ func (z *Client) GetChildren(req *GetChildrenReq) (*GetChildrenResp, error) {
 	return resp, nil
 }
 
-func (z *Client) CloseSession(req *CloseReq) (*CloseResp, error) {
-	bytes, err := z.Send(req.Bytes(true))
+func (c *Client) CloseSession(req *CloseReq) (*CloseResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
 		return nil, err
 	}
@@ -126,12 +126,12 @@ func (z *Client) CloseSession(req *CloseReq) (*CloseResp, error) {
 	return resp, nil
 }
 
-func (z *Client) Send(bytes []byte) ([]byte, error) {
+func (c *Client) Send(bytes []byte) ([]byte, error) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	var result []byte
 	var err error
-	z.sendAsync(bytes, func(resp []byte, e error) {
+	c.sendAsync(bytes, func(resp []byte, e error) {
 		result = resp
 		err = e
 		wg.Done()
@@ -143,102 +143,95 @@ func (z *Client) Send(bytes []byte) ([]byte, error) {
 	return result, nil
 }
 
-func (z *Client) sendAsync(bytes []byte, callback func([]byte, error)) {
+func (c *Client) sendAsync(bytes []byte, callback func([]byte, error)) {
 	sr := &sendRequest{
 		bytes:    bytes,
 		callback: callback,
 	}
-	z.eventsChan <- sr
+	c.eventsChan <- sr
 }
 
-func (z *Client) read() {
+func (c *Client) read() {
 	for {
 		select {
-		case req := <-z.pendingQueue:
-			n, err := z.conn.Read(z.buffer.WritableSlice())
+		case req := <-c.pendingQueue:
+			n, err := c.conn.Read(c.buffer.WritableSlice())
 			if err != nil {
 				req.callback(nil, err)
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
-			err = z.buffer.AdjustWriteCursor(n)
+			err = c.buffer.AdjustWriteCursor(n)
 			if err != nil {
 				req.callback(nil, err)
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
-			if z.buffer.Size() < 4 {
+			if c.buffer.Size() < 4 {
 				continue
 			}
 			bytes := make([]byte, 4)
-			err = z.buffer.ReadExactly(bytes)
-			z.buffer.Compact()
+			err = c.buffer.ReadExactly(bytes)
+			c.buffer.Compact()
 			if err != nil {
 				req.callback(nil, err)
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
 			length := int(bytes[3]) | int(bytes[2])<<8 | int(bytes[1])<<16 | int(bytes[0])<<24
-			if z.buffer.Size() < length {
+			if c.buffer.Size() < length {
 				continue
 			}
 			// in case ddos attack
-			if length > z.buffer.Capacity() {
+			if length > c.buffer.Capacity() {
 				req.callback(nil, fmt.Errorf("response length %d is too large", length))
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
 			data := make([]byte, length)
-			err = z.buffer.ReadExactly(data)
+			err = c.buffer.ReadExactly(data)
 			if err != nil {
 				req.callback(nil, err)
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
-			z.buffer.Compact()
+			c.buffer.Compact()
 			req.callback(data, nil)
-		case <-z.closeCh:
+		case <-c.closeCh:
 			return
 		}
 	}
 }
 
-func (z *Client) write() {
+func (c *Client) write() {
 	for {
 		select {
-		case req := <-z.eventsChan:
-			n, err := z.conn.Write(req.bytes)
+		case req := <-c.eventsChan:
+			n, err := c.conn.Write(req.bytes)
 			if err != nil {
 				req.callback(nil, err)
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
 			if n != len(req.bytes) {
 				req.callback(nil, fmt.Errorf("write %d bytes, but expect %d bytes", n, len(req.bytes)))
-				z.closeCh <- struct{}{}
+				c.closeCh <- struct{}{}
 				break
 			}
-			z.pendingQueue <- req
-		case <-z.closeCh:
+			c.pendingQueue <- req
+		case <-c.closeCh:
 			return
 		}
 	}
 }
 
-func (z *Client) Close() {
-	_ = z.conn.Close()
-	z.closeCh <- struct{}{}
+func (c *Client) Close() {
+	_ = c.conn.Close()
+	c.closeCh <- struct{}{}
 }
 
 func NewClient(config Config) (*Client, error) {
-	var conn net.Conn
-	var err error
-
-	if config.TlsConfig == nil {
-		conn, err = net.Dial("tcp", config.Address.Addr())
-	} else {
-		conn, err = tls.Dial("tcp", config.Address.Addr(), config.TlsConfig)
-	}
+	conn, err := netx.Dial(config.Address, config.TlsConfig)
 
 	if err != nil {
 		return nil, err
@@ -252,17 +245,18 @@ func NewClient(config Config) (*Client, error) {
 	if config.BufferMax == 0 {
 		config.BufferMax = 512 * 1024
 	}
-	z := &Client{}
-	z.conn = conn
-	z.eventsChan = make(chan *sendRequest, config.SendQueueSize)
-	z.pendingQueue = make(chan *sendRequest, config.PendingQueueSize)
-	z.buffer = buffer.NewBuffer(config.BufferMax)
-	z.closeCh = make(chan struct{})
+	client := &Client{
+		conn:         conn,
+		eventsChan:   make(chan *sendRequest, config.SendQueueSize),
+		pendingQueue: make(chan *sendRequest, config.PendingQueueSize),
+		buffer:       buffer.NewBuffer(config.BufferMax),
+		closeCh:      make(chan struct{}),
+	}
 	go func() {
-		z.read()
+		client.read()
 	}()
 	go func() {
-		z.write()
+		client.write()
 	}()
-	return z, nil
+	return client, nil
 }
