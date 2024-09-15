@@ -2,10 +2,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/shoothzj/gox v0.0.3-0.20240914151832-cfd84e798241 h1:S2DxyRMBGT4EYxYOy61hwoicrMJFVi4H1goUu6nNhNU=
-github.com/shoothzj/gox v0.0.3-0.20240914151832-cfd84e798241/go.mod h1:W8vthsaC2LWvu1zy/B9znKuOOSrFUqWCMHkdbqZJE04=
-github.com/shoothzj/gox v0.0.3-0.20240915030409-0ff3ac4e657c h1:bGa8KCyniEJwV1IF6BKSwjKlexk5If8cXp3M17JOfa4=
-github.com/shoothzj/gox v0.0.3-0.20240915030409-0ff3ac4e657c/go.mod h1:W8vthsaC2LWvu1zy/B9znKuOOSrFUqWCMHkdbqZJE04=
+github.com/shoothzj/gox v0.0.3 h1:jWVygF7M30M2/85xSTjopJDIda1405q1SGFNCo96Ock=
+github.com/shoothzj/gox v0.0.3/go.mod h1:JrD7u6Tem/9Ut4o0kQNK+aZkMWCba/d9VeabBZSEDT4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

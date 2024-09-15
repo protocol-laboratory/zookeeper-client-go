@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func TestCliConnect(t *testing.T) {
-	config := Config{
+func TestClientGetChildrenData(t *testing.T) {
+	config := &Config{
 		Address: netx.Address{
 			Host: "localhost",
 			Port: 2181,
@@ -17,15 +17,10 @@ func TestCliConnect(t *testing.T) {
 	client, err := NewClient(config)
 	require.NoError(t, err)
 	defer client.Close()
-	req := &ConnectReq{
-		ProtocolVersion: 0,
-		LastZxidSeen:    0,
-		Timeout:         30_000,
-		SessionId:       0,
-		Password:        PasswordEmpty,
-		ReadOnly:        false,
-	}
-	resp, err := client.Connect(req)
+	getChildrenResp, err := client.GetChildren("/")
 	require.Nil(t, err)
-	assert.NotNil(t, resp)
+	assert.NotNil(t, getChildrenResp)
+	getDataResp, err := client.GetData("/zookeeper")
+	require.Nil(t, err)
+	assert.NotNil(t, getDataResp)
 }
