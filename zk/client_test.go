@@ -9,9 +9,11 @@ import (
 
 func TestClientGetChildrenData(t *testing.T) {
 	config := &Config{
-		Address: netx.Address{
-			Host: "localhost",
-			Port: 2181,
+		Addresses: []netx.Address{
+			{
+				Host: "localhost",
+				Port: 2181,
+			},
 		},
 	}
 	client, err := NewClient(config)
