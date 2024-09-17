@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 func TestProtocolClientConnect(t *testing.T) {
@@ -15,7 +16,7 @@ func TestProtocolClientConnect(t *testing.T) {
 		SendQueueSize:    100,
 		PendingQueueSize: 100,
 		BufferMax:        1024,
-	})
+	}, make(chan time.Time))
 	require.NoError(t, err)
 	defer client.Close()
 	req := &ConnectReq{
@@ -32,6 +33,7 @@ func TestProtocolClientConnect(t *testing.T) {
 }
 
 func TestProtocolClientConnectAfterClose(t *testing.T) {
+	reconnectChannel := make(chan time.Time, 1024)
 	client, err := NewProtocolClient(netx.Address{
 		Host: "localhost",
 		Port: 2181,
@@ -39,7 +41,7 @@ func TestProtocolClientConnectAfterClose(t *testing.T) {
 		SendQueueSize:    100,
 		PendingQueueSize: 100,
 		BufferMax:        1024,
-	})
+	}, reconnectChannel)
 	require.NoError(t, err)
 	req := &ConnectReq{
 		ProtocolVersion: 0,
@@ -55,4 +57,5 @@ func TestProtocolClientConnectAfterClose(t *testing.T) {
 	client.Close()
 	_, err = client.Connect(req)
 	assert.Equal(t, ErrClientClosed, err)
+	close(reconnectChannel)
 }

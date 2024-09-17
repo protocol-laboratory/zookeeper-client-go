@@ -7,6 +7,7 @@ import (
 	"github.com/shoothzj/gox/netx"
 	"net"
 	"sync"
+	"time"
 )
 
 type sendRequest struct {
@@ -22,6 +23,8 @@ type ProtocolClient struct {
 	buffer       *buffer.Buffer
 	ctx          context.Context
 	ctxCancel    context.CancelFunc
+	closeOnce    sync.Once
+	reconnectCh  chan time.Time
 }
 
 func (c *ProtocolClient) Connect(req *ConnectReq) (*ConnectResp, error) {
@@ -141,6 +144,7 @@ func (c *ProtocolClient) sendAsync(bytes []byte, callback func([]byte, error)) {
 	select {
 	case <-c.ctx.Done():
 		callback(nil, ErrClientClosed)
+		c.reconnectCh <- time.Now()
 	default:
 		sr := &sendRequest{
 			bytes:    bytes,
@@ -215,17 +219,20 @@ func (c *ProtocolClient) write() {
 }
 
 func (c *ProtocolClient) close() {
+	c.reconnectCh <- time.Now()
 	c.Close()
 }
 
 func (c *ProtocolClient) Close() {
-	c.ctxCancel()
-	_ = c.conn.Close()
-	close(c.eventsChan)
-	close(c.pendingQueue)
+	c.closeOnce.Do(func() {
+		c.ctxCancel()
+		_ = c.conn.Close()
+		close(c.eventsChan)
+		close(c.pendingQueue)
+	})
 }
 
-func NewProtocolClient(address netx.Address, config *Config) (*ProtocolClient, error) {
+func NewProtocolClient(address netx.Address, config *Config, reconnectCh chan time.Time) (*ProtocolClient, error) {
 	conn, err := netx.Dial(address, config.TlsConfig)
 
 	if err != nil {
@@ -240,6 +247,7 @@ func NewProtocolClient(address netx.Address, config *Config) (*ProtocolClient, e
 		buffer:       buffer.NewBuffer(config.BufferMax),
 		ctx:          ctx,
 		ctxCancel:    cancel,
+		reconnectCh:  reconnectCh,
 	}
 	go func() {
 		client.read()
