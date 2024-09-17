@@ -168,7 +168,7 @@ func (c *ProtocolClient) read() {
 			c.close()
 			break
 		}
-		if c.buffer.Size() < 4 {
+		if c.buffer.ReadableSize() < 4 {
 			continue
 		}
 		bytes := make([]byte, 4)
@@ -180,7 +180,7 @@ func (c *ProtocolClient) read() {
 			break
 		}
 		length := int(bytes[3]) | int(bytes[2])<<8 | int(bytes[1])<<16 | int(bytes[0])<<24
-		if c.buffer.Size() < length {
+		if c.buffer.ReadableSize() < length {
 			continue
 		}
 		// in case ddos attack
