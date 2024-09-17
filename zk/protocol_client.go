@@ -1,6 +1,7 @@
 package zk
 
 import (
+	"context"
 	"fmt"
 	"github.com/shoothzj/gox/buffer"
 	"github.com/shoothzj/gox/netx"
@@ -19,7 +20,8 @@ type ProtocolClient struct {
 	eventsChan   chan *sendRequest
 	pendingQueue chan *sendRequest
 	buffer       *buffer.Buffer
-	closeCh      chan struct{}
+	ctx          context.Context
+	ctxCancel    context.CancelFunc
 }
 
 func (c *ProtocolClient) Connect(req *ConnectReq) (*ConnectResp, error) {
@@ -136,90 +138,91 @@ func (c *ProtocolClient) Send(bytes []byte) ([]byte, error) {
 }
 
 func (c *ProtocolClient) sendAsync(bytes []byte, callback func([]byte, error)) {
-	sr := &sendRequest{
-		bytes:    bytes,
-		callback: callback,
+	select {
+	case <-c.ctx.Done():
+		callback(nil, ErrClientClosed)
+	default:
+		sr := &sendRequest{
+			bytes:    bytes,
+			callback: callback,
+		}
+		c.eventsChan <- sr
 	}
-	c.eventsChan <- sr
 }
 
 func (c *ProtocolClient) read() {
-	for {
-		select {
-		case req := <-c.pendingQueue:
-			n, err := c.conn.Read(c.buffer.WritableSlice())
-			if err != nil {
-				req.callback(nil, err)
-				c.closeCh <- struct{}{}
-				break
-			}
-			err = c.buffer.AdjustWriteCursor(n)
-			if err != nil {
-				req.callback(nil, err)
-				c.closeCh <- struct{}{}
-				break
-			}
-			if c.buffer.Size() < 4 {
-				continue
-			}
-			bytes := make([]byte, 4)
-			err = c.buffer.ReadExactly(bytes)
-			c.buffer.Compact()
-			if err != nil {
-				req.callback(nil, err)
-				c.closeCh <- struct{}{}
-				break
-			}
-			length := int(bytes[3]) | int(bytes[2])<<8 | int(bytes[1])<<16 | int(bytes[0])<<24
-			if c.buffer.Size() < length {
-				continue
-			}
-			// in case ddos attack
-			if length > c.buffer.Capacity() {
-				req.callback(nil, fmt.Errorf("response length %d is too large", length))
-				c.closeCh <- struct{}{}
-				break
-			}
-			data := make([]byte, length)
-			err = c.buffer.ReadExactly(data)
-			if err != nil {
-				req.callback(nil, err)
-				c.closeCh <- struct{}{}
-				break
-			}
-			c.buffer.Compact()
-			req.callback(data, nil)
-		case <-c.closeCh:
-			return
+	for req := range c.pendingQueue {
+		n, err := c.conn.Read(c.buffer.WritableSlice())
+		if err != nil {
+			req.callback(nil, err)
+			c.close()
+			break
 		}
+		err = c.buffer.AdjustWriteCursor(n)
+		if err != nil {
+			req.callback(nil, err)
+			c.close()
+			break
+		}
+		if c.buffer.Size() < 4 {
+			continue
+		}
+		bytes := make([]byte, 4)
+		err = c.buffer.ReadExactly(bytes)
+		c.buffer.Compact()
+		if err != nil {
+			req.callback(nil, err)
+			c.close()
+			break
+		}
+		length := int(bytes[3]) | int(bytes[2])<<8 | int(bytes[1])<<16 | int(bytes[0])<<24
+		if c.buffer.Size() < length {
+			continue
+		}
+		// in case ddos attack
+		if length > c.buffer.Capacity() {
+			req.callback(nil, fmt.Errorf("response length %d is too large", length))
+			c.close()
+			break
+		}
+		data := make([]byte, length)
+		err = c.buffer.ReadExactly(data)
+		if err != nil {
+			req.callback(nil, err)
+			c.close()
+			break
+		}
+		c.buffer.Compact()
+		req.callback(data, nil)
 	}
 }
 
 func (c *ProtocolClient) write() {
-	for {
-		select {
-		case req := <-c.eventsChan:
-			n, err := c.conn.Write(req.bytes)
-			if err != nil {
-				req.callback(nil, err)
-				c.closeCh <- struct{}{}
-				break
-			}
-			if n != len(req.bytes) {
-				req.callback(nil, fmt.Errorf("write %d bytes, but expect %d bytes", n, len(req.bytes)))
-				c.closeCh <- struct{}{}
-				break
-			}
-			c.pendingQueue <- req
-		case <-c.closeCh:
-			return
+	for req := range c.eventsChan {
+		n, err := c.conn.Write(req.bytes)
+		if err != nil {
+			req.callback(nil, err)
+			c.close()
+			break
 		}
+		if n != len(req.bytes) {
+			req.callback(nil, fmt.Errorf("write %d bytes, but expect %d bytes", n, len(req.bytes)))
+			c.close()
+			break
+		}
+		c.pendingQueue <- req
 	}
 }
 
+func (c *ProtocolClient) close() {
+	c.Close()
+}
+
 func (c *ProtocolClient) Close() {
+	c.ctxCancel()
 	_ = c.conn.Close()
-	c.closeCh <- struct{}{}
+	close(c.eventsChan)
+	close(c.pendingQueue)
 }
 
 func NewProtocolClient(address netx.Address, config *Config) (*ProtocolClient, error) {
@@ -228,13 +231,15 @@ func NewProtocolClient(address netx.Address, config *Config) (*ProtocolClient, e
 	if err != nil {
 		return nil, err
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 	client := &ProtocolClient{
 		config:       config,
 		conn:         conn,
 		eventsChan:   make(chan *sendRequest, config.SendQueueSize),
 		pendingQueue: make(chan *sendRequest, config.PendingQueueSize),
 		buffer:       buffer.NewBuffer(config.BufferMax),
-		closeCh:      make(chan struct{}),
+		ctx:          ctx,
+		ctxCancel:    cancel,
 	}
 	go func() {
 		client.read()
