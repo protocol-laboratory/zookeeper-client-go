@@ -1,6 +1,6 @@
 module github.com/protocol-laboratory/zookeeper-client-go
 
-go 1.20
+go 1.19
 
 require (
 	github.com/libgox/buffer v0.0.0-20241010235618-d8b51aafaff0

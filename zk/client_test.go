@@ -1,9 +1,10 @@
 package zk
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestClientGetChildrenData(t *testing.T) {
