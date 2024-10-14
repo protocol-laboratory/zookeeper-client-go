@@ -1,9 +1,10 @@
 package zk
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TestDecodeSnapshot zookeeper without traffic

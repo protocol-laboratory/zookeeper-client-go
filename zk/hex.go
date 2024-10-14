@@ -2,9 +2,10 @@ package zk
 
 import (
 	"encoding/hex"
+	"testing"
+
 	"github.com/libgox/buffer"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func hex2Bytes(t *testing.T, str string) []byte {

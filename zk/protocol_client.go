@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/libgox/buffer"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/libgox/buffer"
 )
 
 type sendRequest struct {
