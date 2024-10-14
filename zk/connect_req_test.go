@@ -1,13 +1,12 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeConnectReq(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "000000000000000000000000000075300000000000000000000000100000000000000000000000000000000000")
+	bytes := hex2Bytes(t, "000000000000000000000000000075300000000000000000000000100000000000000000000000000000000000")
 	req, err := DecodeConnectReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, req.ProtocolVersion)
@@ -27,5 +26,5 @@ func TestEncodeConnectReq(t *testing.T) {
 		ReadOnly:        false,
 	}
 	bytes := req.Bytes(false)
-	assert.Equal(t, testx.Hex2Bytes(t, "000000000000000000000000000075300000000000000000000000100000000000000000000000000000000000"), bytes)
+	assert.Equal(t, hex2Bytes(t, "000000000000000000000000000075300000000000000000000000100000000000000000000000000000000000"), bytes)
 }

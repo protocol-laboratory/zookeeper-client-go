@@ -2,9 +2,9 @@ package zk
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/shoothzj/gox/buffer"
-	"github.com/shoothzj/gox/netx"
+	"github.com/libgox/buffer"
 	"net"
 	"sync"
 	"time"
@@ -232,8 +232,14 @@ func (c *ProtocolClient) Close() {
 	})
 }
 
-func NewProtocolClient(address netx.Address, config *Config, reconnectCh chan time.Time) (*ProtocolClient, error) {
-	conn, err := netx.Dial(address, config.TlsConfig)
+func NewProtocolClient(address Address, config *Config, reconnectCh chan time.Time) (*ProtocolClient, error) {
+	var conn net.Conn
+	var err error
+	if config.TlsConfig != nil {
+		conn, err = tls.Dial("tcp", address.Addr(), config.TlsConfig)
+	} else {
+		conn, err = net.Dial("tcp", address.Addr())
+	}
 
 	if err != nil {
 		return nil, err

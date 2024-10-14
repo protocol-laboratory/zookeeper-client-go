@@ -1,7 +1,6 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/netx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -9,7 +8,7 @@ import (
 
 func TestClientGetChildrenData(t *testing.T) {
 	config := &Config{
-		Addresses: []netx.Address{
+		Addresses: []Address{
 			{
 				Host: "localhost",
 				Port: 2181,

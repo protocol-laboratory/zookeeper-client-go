@@ -3,7 +3,7 @@ module github.com/protocol-laboratory/zookeeper-client-go
 go 1.20
 
 require (
-	github.com/shoothzj/gox v0.0.4
+	github.com/libgox/buffer v0.0.0-20241010235618-d8b51aafaff0
 	github.com/stretchr/testify v1.9.0
 )
 

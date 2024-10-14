@@ -1,13 +1,12 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeConnectResp(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "00000000000075300100020abac20001000000109f9f123fc926a4013f35eca7ee76386100")
+	bytes := hex2Bytes(t, "00000000000075300100020abac20001000000109f9f123fc926a4013f35eca7ee76386100")
 	resp, err := DecodeConnectResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, resp.ProtocolVersion)
@@ -21,9 +20,9 @@ func TestEncodeConnectResp(t *testing.T) {
 		ProtocolVersion: 0,
 		Timeout:         30_000,
 		SessionId:       72059839144132609,
-		Password:        testx.Hex2Bytes(t, "9f9f123fc926a4013f35eca7ee763861"),
+		Password:        hex2Bytes(t, "9f9f123fc926a4013f35eca7ee763861"),
 		ReadOnly:        false,
 	}
 	bytes := resp.Bytes(false)
-	assert.Equal(t, testx.Hex2Bytes(t, "00000000000075300100020abac20001000000109f9f123fc926a4013f35eca7ee76386100"), bytes)
+	assert.Equal(t, hex2Bytes(t, "00000000000075300100020abac20001000000109f9f123fc926a4013f35eca7ee76386100"), bytes)
 }

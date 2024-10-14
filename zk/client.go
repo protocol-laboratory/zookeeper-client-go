@@ -2,7 +2,6 @@ package zk
 
 import (
 	"crypto/tls"
-	"github.com/shoothzj/gox/netx"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -10,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Addresses        []netx.Address
+	Addresses        []Address
 	SendQueueSize    int
 	PendingQueueSize int
 	BufferMax        int

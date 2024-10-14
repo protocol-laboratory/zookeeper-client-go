@@ -1,13 +1,12 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeExistsResp(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "00000001000000000000001f00000000000000000000001c000000000000001d00000182ee57606900000182ee57606c00000001000000000000000000000000000000000000000500000000000000000000001c")
+	bytes := hex2Bytes(t, "00000001000000000000001f00000000000000000000001c000000000000001d00000182ee57606900000182ee57606c00000001000000000000000000000000000000000000000500000000000000000000001c")
 	resp, err := DecodeExistsResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, resp.TransactionId)
@@ -46,11 +45,11 @@ func TestEncodeExistsResp(t *testing.T) {
 		},
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "00000001000000000000001f00000000000000000000001c000000000000001d00000182ee57606900000182ee57606c00000001000000000000000000000000000000000000000500000000000000000000001c"), bytes)
+	assert.Equal(t, hex2Bytes(t, "00000001000000000000001f00000000000000000000001c000000000000001d00000182ee57606900000182ee57606c00000001000000000000000000000000000000000000000500000000000000000000001c"), bytes)
 }
 
 func TestDecodeExistsRespNoNodeExist(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "00000001000000000000001bffffff9b")
+	bytes := hex2Bytes(t, "00000001000000000000001bffffff9b")
 	resp, err := DecodeExistsResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, resp.TransactionId)
@@ -65,5 +64,5 @@ func TestEncodeExistsRespNoNodeExist(t *testing.T) {
 		Error:         EC_NoNodeError,
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "00000001000000000000001bffffff9b"), bytes)
+	assert.Equal(t, hex2Bytes(t, "00000001000000000000001bffffff9b"), bytes)
 }

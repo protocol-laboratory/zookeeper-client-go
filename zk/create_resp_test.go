@@ -1,13 +1,12 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeCreateResp(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "00000001000000000000000500000000000000082f7a6b2d74657374")
+	bytes := hex2Bytes(t, "00000001000000000000000500000000000000082f7a6b2d74657374")
 	resp, err := DecodeCreateResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, resp.TransactionId)
@@ -24,11 +23,11 @@ func TestEncodeCreateResp(t *testing.T) {
 		Path:          "/zk-test",
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "00000001000000000000000500000000000000082f7a6b2d74657374"), bytes)
+	assert.Equal(t, hex2Bytes(t, "00000001000000000000000500000000000000082f7a6b2d74657374"), bytes)
 }
 
 func TestDecodeCreateRespNodeExistsError(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "000000020000000000000020ffffff92")
+	bytes := hex2Bytes(t, "000000020000000000000020ffffff92")
 	resp, err := DecodeCreateResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, resp.TransactionId)
@@ -43,5 +42,5 @@ func TestEncodeCreateRespNodeExistsError(t *testing.T) {
 		Error:         EC_NodeExistsError,
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "000000020000000000000020ffffff92"), bytes)
+	assert.Equal(t, hex2Bytes(t, "000000020000000000000020ffffff92"), bytes)
 }

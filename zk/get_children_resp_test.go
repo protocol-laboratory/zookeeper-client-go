@@ -1,13 +1,12 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeGetChildrenResp(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "00000001000000000000002200000000000000030000000a65786973742d74657374000000077a6b2d74657374000000097a6f6f6b6565706572")
+	bytes := hex2Bytes(t, "00000001000000000000002200000000000000030000000a65786973742d74657374000000077a6b2d74657374000000097a6f6f6b6565706572")
 	resp, err := DecodeGetChildrenResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, resp.TransactionId)
@@ -27,5 +26,5 @@ func TestEncodeGetChildrenResp(t *testing.T) {
 		Children:      []string{"exist-test", "zk-test", "zookeeper"},
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "00000001000000000000002200000000000000030000000a65786973742d74657374000000077a6b2d74657374000000097a6f6f6b6565706572"), bytes)
+	assert.Equal(t, hex2Bytes(t, "00000001000000000000002200000000000000030000000a65786973742d74657374000000077a6b2d74657374000000097a6f6f6b6565706572"), bytes)
 }

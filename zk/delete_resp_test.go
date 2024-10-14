@@ -1,13 +1,12 @@
 package zk
 
 import (
-	"github.com/shoothzj/gox/testx"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDecodeDeleteResp(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "00000002000000000000002600000000")
+	bytes := hex2Bytes(t, "00000002000000000000002600000000")
 	resp, err := DecodeDeleteResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, resp.TransactionId)
@@ -22,11 +21,11 @@ func TestEncodeDeleteResp(t *testing.T) {
 		Error:         EC_OK,
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "00000002000000000000002600000000"), bytes)
+	assert.Equal(t, hex2Bytes(t, "00000002000000000000002600000000"), bytes)
 }
 
 func TestDecodeDeleteRespNoNodeExist(t *testing.T) {
-	bytes := testx.Hex2Bytes(t, "000000010000000000000025ffffff9b")
+	bytes := hex2Bytes(t, "000000010000000000000025ffffff9b")
 	resp, err := DecodeDeleteResp(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, resp.TransactionId)
@@ -41,5 +40,5 @@ func TestEncodeDeleteRespNoNodeExist(t *testing.T) {
 		Error:         EC_NoNodeError,
 	}
 	bytes := resp.Bytes()
-	assert.Equal(t, testx.Hex2Bytes(t, "000000010000000000000025ffffff9b"), bytes)
+	assert.Equal(t, hex2Bytes(t, "000000010000000000000025ffffff9b"), bytes)
 }
