@@ -4,12 +4,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/libgox/addr"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestProtocolClientConnect(t *testing.T) {
-	client, err := NewProtocolClient(Address{
+	client, err := NewProtocolClient(addr.Address{
 		Host: "localhost",
 		Port: 2181,
 	}, &Config{
@@ -34,7 +36,7 @@ func TestProtocolClientConnect(t *testing.T) {
 
 func TestProtocolClientConnectAfterClose(t *testing.T) {
 	reconnectChannel := make(chan time.Time, 1024)
-	client, err := NewProtocolClient(Address{
+	client, err := NewProtocolClient(addr.Address{
 		Host: "localhost",
 		Port: 2181,
 	}, &Config{

@@ -4,13 +4,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/libgox/addr"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestClientReconnect(t *testing.T) {
 	config := &Config{
-		Addresses: []Address{
+		Addresses: []addr.Address{
 			{
 				Host: "localhost",
 				Port: 2181,
