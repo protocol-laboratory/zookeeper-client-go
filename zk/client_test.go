@@ -3,13 +3,15 @@ package zk
 import (
 	"testing"
 
+	"github.com/libgox/addr"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestClientGetChildrenData(t *testing.T) {
 	config := &Config{
-		Addresses: []Address{
+		Addresses: []addr.Address{
 			{
 				Host: "localhost",
 				Port: 2181,

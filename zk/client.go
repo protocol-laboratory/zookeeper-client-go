@@ -6,10 +6,12 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/libgox/addr"
 )
 
 type Config struct {
-	Addresses        []Address
+	Addresses        []addr.Address
 	SendQueueSize    int
 	PendingQueueSize int
 	BufferMax        int

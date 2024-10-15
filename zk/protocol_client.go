@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/libgox/addr"
+
 	"github.com/libgox/buffer"
 )
 
@@ -233,7 +235,7 @@ func (c *ProtocolClient) Close() {
 	})
 }
 
-func NewProtocolClient(address Address, config *Config, reconnectCh chan time.Time) (*ProtocolClient, error) {
+func NewProtocolClient(address addr.Address, config *Config, reconnectCh chan time.Time) (*ProtocolClient, error) {
 	var conn net.Conn
 	var err error
 	if config.TlsConfig != nil {
