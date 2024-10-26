@@ -3,7 +3,7 @@ package zk
 import "runtime/debug"
 
 type CloseResp struct {
-	TransactionId int
+	TransactionId int32
 	ZxId          int64
 	Error         ErrorCode
 }

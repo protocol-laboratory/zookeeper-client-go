@@ -10,7 +10,7 @@ func TestDecodeExistsResp(t *testing.T) {
 	bytes := hex2Bytes(t, "00000001000000000000001f00000000000000000000001c000000000000001d00000182ee57606900000182ee57606c00000001000000000000000000000000000000000000000500000000000000000000001c")
 	resp, err := DecodeExistsResp(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, resp.TransactionId)
+	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(31), resp.ZxId)
 	assert.Equal(t, EC_OK, resp.Error)
 	assert.Equal(t, int64(28), resp.Stat.CreatedZxId)
@@ -53,7 +53,7 @@ func TestDecodeExistsRespNoNodeExist(t *testing.T) {
 	bytes := hex2Bytes(t, "00000001000000000000001bffffff9b")
 	resp, err := DecodeExistsResp(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, resp.TransactionId)
+	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(27), resp.ZxId)
 	assert.Equal(t, EC_NoNodeError, resp.Error)
 }

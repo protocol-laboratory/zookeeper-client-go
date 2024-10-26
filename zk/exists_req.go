@@ -3,7 +3,7 @@ package zk
 import "runtime/debug"
 
 type ExistsReq struct {
-	TransactionId int
+	TransactionId int32
 	OpCode        OpCode
 	Path          string
 	Watch         bool

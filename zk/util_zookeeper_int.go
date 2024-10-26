@@ -82,11 +82,3 @@ func readTimeout(bytes []byte, idx int) (int, int) {
 func putTimeout(bytes []byte, idx int, x int) int {
 	return putInt(bytes, idx, x)
 }
-
-func readTransactionId(bytes []byte, idx int) (int, int) {
-	return readInt(bytes, idx)
-}
-
-func putTransactionId(bytes []byte, idx int, x int) int {
-	return putInt(bytes, idx, x)
-}

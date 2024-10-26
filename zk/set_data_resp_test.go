@@ -10,7 +10,7 @@ func TestDecodeSetDataResp(t *testing.T) {
 	bytes := hex2Bytes(t, "000000020000000000000006000000000000000000000005000000000000000600000182ec1b539f00000182ec1b53ac000000010000000000000000000000000000000000000005000000000000000000000005")
 	resp, err := DecodeSetDataResp(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 2, resp.TransactionId)
+	assert.Equal(t, int32(2), resp.TransactionId)
 	assert.Equal(t, int64(6), resp.ZxId)
 	assert.Equal(t, EC_OK, resp.Error)
 	assert.Equal(t, int64(5), resp.Stat.CreatedZxId)

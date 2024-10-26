@@ -10,7 +10,7 @@ func TestDecodeCloseReq(t *testing.T) {
 	bytes := hex2Bytes(t, "00000003fffffff5")
 	req, err := DecodeCloseReq(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 3, req.TransactionId)
+	assert.Equal(t, int32(3), req.TransactionId)
 	assert.Equal(t, OP_CLOSE_SESSION, req.OpCode)
 }
 

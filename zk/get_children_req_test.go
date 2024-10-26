@@ -10,7 +10,7 @@ func TestDecodeGetChildrenReq(t *testing.T) {
 	bytes := hex2Bytes(t, "0000000100000008000000012f00")
 	req, err := DecodeGetChildrenReq(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, req.TransactionId)
+	assert.Equal(t, int32(1), req.TransactionId)
 	assert.Equal(t, OP_GET_CHILDREN, req.OpCode)
 	assert.Equal(t, "/", req.Path)
 	assert.False(t, req.Watch)

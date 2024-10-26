@@ -118,8 +118,8 @@ func (c *Client) CloseSession() (*CloseResp, error) {
 	return c.client.CloseSession(req)
 }
 
-func (c *Client) nextTransactionId() int {
-	return int(c.transactionId.Add(1))
+func (c *Client) nextTransactionId() int32 {
+	return c.transactionId.Add(1)
 }
 
 func (c *Client) Close() {
