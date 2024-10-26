@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/libgox/addr"
-
 	"github.com/libgox/buffer"
 )
 
@@ -39,6 +38,7 @@ func (c *ProtocolClient) Connect(req *ConnectReq) (*ConnectResp, error) {
 	if err != nil {
 		return nil, err
 	}
+	c.StartHeartbeat(c.config.Timeout)
 	return resp, nil
 }
 
@@ -114,6 +114,18 @@ func (c *ProtocolClient) GetChildren(req *GetChildrenReq) (*GetChildrenResp, err
 	return resp, nil
 }
 
+func (c *ProtocolClient) Ping(req *PingReq) (*PingResp, error) {
+	bytes, err := c.Send(req.Bytes(true))
+	if err != nil {
+		return nil, err
+	}
+	resp, err := DecodePingResp(bytes)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (c *ProtocolClient) CloseSession(req *CloseReq) (*CloseResp, error) {
 	bytes, err := c.Send(req.Bytes(true))
 	if err != nil {
@@ -124,6 +136,24 @@ func (c *ProtocolClient) CloseSession(req *CloseReq) (*CloseResp, error) {
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (c *ProtocolClient) StartHeartbeat(timeout time.Duration) {
+	go func() {
+		ticker := time.NewTicker(timeout / 3)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				_, _ = c.Ping(&PingReq{
+					TransactionId: -2,
+					OpCode:        OP_PING,
+				})
+			case <-c.ctx.Done():
+				return
+			}
+		}
+	}()
 }
 
 func (c *ProtocolClient) Send(bytes []byte) ([]byte, error) {
