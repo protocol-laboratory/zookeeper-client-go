@@ -3,7 +3,7 @@ package zk
 import "runtime/debug"
 
 type CreateResp struct {
-	TransactionId int
+	TransactionId int32
 	ZxId          int64
 	Error         ErrorCode
 	Path          string

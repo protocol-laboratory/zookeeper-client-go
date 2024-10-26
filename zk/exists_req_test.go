@@ -10,7 +10,7 @@ func TestDecodeExistsReq(t *testing.T) {
 	bytes := hex2Bytes(t, "00000001000000030000000b2f65786973742d7465737400")
 	req, err := DecodeExistsReq(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, req.TransactionId)
+	assert.Equal(t, int32(1), req.TransactionId)
 	assert.Equal(t, OP_EXISTS, req.OpCode)
 	assert.Equal(t, "/exist-test", req.Path)
 	assert.False(t, req.Watch)

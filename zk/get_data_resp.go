@@ -3,7 +3,7 @@ package zk
 import "runtime/debug"
 
 type GetDataResp struct {
-	TransactionId int
+	TransactionId int32
 	ZxId          int64
 	Data          []byte
 	Error         ErrorCode

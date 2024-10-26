@@ -10,7 +10,7 @@ func TestDecodeGetChildrenResp(t *testing.T) {
 	bytes := hex2Bytes(t, "00000001000000000000002200000000000000030000000a65786973742d74657374000000077a6b2d74657374000000097a6f6f6b6565706572")
 	resp, err := DecodeGetChildrenResp(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, resp.TransactionId)
+	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(34), resp.ZxId)
 	assert.Equal(t, EC_OK, resp.Error)
 	assert.Equal(t, 3, len(resp.Children))

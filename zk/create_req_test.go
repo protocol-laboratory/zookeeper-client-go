@@ -10,7 +10,7 @@ func TestDecodeCreateReq(t *testing.T) {
 	bytes := hex2Bytes(t, "0000000100000001000000082f7a6b2d746573740000000568656c6c6f000000010000001f00000005776f726c6400000006616e796f6e6500000000")
 	req, err := DecodeCreateReq(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, req.TransactionId)
+	assert.Equal(t, int32(1), req.TransactionId)
 	assert.Equal(t, OP_CREATE, req.OpCode)
 	assert.Equal(t, "/zk-test", req.Path)
 	assert.Equal(t, []byte("hello"), req.Data)

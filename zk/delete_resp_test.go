@@ -10,7 +10,7 @@ func TestDecodeDeleteResp(t *testing.T) {
 	bytes := hex2Bytes(t, "00000002000000000000002600000000")
 	resp, err := DecodeDeleteResp(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 2, resp.TransactionId)
+	assert.Equal(t, int32(2), resp.TransactionId)
 	assert.Equal(t, int64(38), resp.ZxId)
 	assert.Equal(t, EC_OK, resp.Error)
 }
@@ -29,7 +29,7 @@ func TestDecodeDeleteRespNoNodeExist(t *testing.T) {
 	bytes := hex2Bytes(t, "000000010000000000000025ffffff9b")
 	resp, err := DecodeDeleteResp(bytes)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, resp.TransactionId)
+	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(37), resp.ZxId)
 	assert.Equal(t, EC_NoNodeError, resp.Error)
 }

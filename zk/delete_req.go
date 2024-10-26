@@ -3,7 +3,7 @@ package zk
 import "runtime/debug"
 
 type DeleteReq struct {
-	TransactionId int
+	TransactionId int32
 	OpCode        OpCode
 	Path          string
 	Version       int
