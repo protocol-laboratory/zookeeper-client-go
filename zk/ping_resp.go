@@ -6,18 +6,17 @@ type PingResp struct {
 	TransactionId int32
 }
 
-func DecodePingResp(bytes []byte) (req *PingResp, err error) {
+func DecodePingResp(bytes []byte) (resp *PingResp, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = PanicToError(r, debug.Stack())
-			req = nil
+			resp = nil
 		}
 	}()
-	req = &PingResp{}
+	resp = &PingResp{}
 	idx := 0
-	aux, idx := readTransactionId(bytes, idx)
-	req.TransactionId = int32(aux)
-	return req, nil
+	resp.TransactionId, idx = readTransactionId(bytes, idx)
+	return resp, nil
 }
 
 func (p *PingResp) BytesLength(containLen bool) int {

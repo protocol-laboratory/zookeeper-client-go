@@ -180,6 +180,9 @@ func NewClient(config *Config) (*Client, error) {
 	if config.BufferMax == 0 {
 		config.BufferMax = 512 * 1024
 	}
+	if config.Timeout <= 0 {
+		config.Timeout = 30 * time.Second
+	}
 
 	client := &Client{
 		config:      config,
