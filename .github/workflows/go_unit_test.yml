@@ -19,6 +19,8 @@ jobs:
       - name: setup ZooKeeper
         uses: shoothzj/setup-zookeeper-action@main
       - name: Run coverage
-        run: go test ./... -race -coverprofile=coverage.out -covermode=atomic
+        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic
       - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
