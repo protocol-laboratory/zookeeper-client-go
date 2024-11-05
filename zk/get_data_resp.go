@@ -22,8 +22,8 @@ func DecodeGetDataResp(bytes []byte) (resp *GetDataResp, err error) {
 	resp.TransactionId, idx = readTransactionId(bytes, idx)
 	resp.ZxId, idx = readZxId(bytes, idx)
 	resp.Error, idx = readError(bytes, idx)
-	resp.Data, idx = readData(bytes, idx)
 	if resp.Error == EC_OK {
+		resp.Data, idx = readData(bytes, idx)
 		resp.Stat, idx = readStat(bytes, idx)
 	}
 	return resp, nil

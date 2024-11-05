@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/libgox/addr v0.2.0
-	github.com/libgox/buffer v0.0.0-20241024142853-0102c7922ab2
+	github.com/libgox/buffer v0.1.0
 	github.com/stretchr/testify v1.9.0
 )
 
