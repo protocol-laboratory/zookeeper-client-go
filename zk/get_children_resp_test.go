@@ -12,7 +12,7 @@ func TestDecodeGetChildrenResp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(34), resp.ZxId)
-	assert.Equal(t, EC_OK, resp.Error)
+	assert.Equal(t, EcOk, resp.Error)
 	assert.Equal(t, 3, len(resp.Children))
 	assert.Equal(t, "exist-test", resp.Children[0])
 	assert.Equal(t, "zk-test", resp.Children[1])
@@ -23,7 +23,7 @@ func TestEncodeGetChildrenResp(t *testing.T) {
 	resp := &GetChildrenResp{
 		TransactionId: 1,
 		ZxId:          34,
-		Error:         EC_OK,
+		Error:         EcOk,
 		Children:      []string{"exist-test", "zk-test", "zookeeper"},
 	}
 	bytes := resp.Bytes()

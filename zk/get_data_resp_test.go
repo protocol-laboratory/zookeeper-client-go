@@ -12,7 +12,7 @@ func TestDecodeGetDataResp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(3), resp.TransactionId)
 	assert.Equal(t, int64(50), resp.ZxId)
-	assert.Equal(t, EC_OK, resp.Error)
+	assert.Equal(t, EcOk, resp.Error)
 	assert.Equal(t, int64(49), resp.Stat.CreatedZxId)
 	assert.Equal(t, int64(50), resp.Stat.LastModifiedZxId)
 	assert.Equal(t, int64(1661871488353), resp.Stat.Created)
@@ -30,7 +30,7 @@ func TestEncodeGetDataResp(t *testing.T) {
 	resp := &GetDataResp{
 		TransactionId: 3,
 		ZxId:          50,
-		Error:         EC_OK,
+		Error:         EcOk,
 		Data:          []byte("world"),
 		Stat: &Stat{
 			CreatedZxId:              49,

@@ -21,7 +21,7 @@ func DecodeCreateResp(bytes []byte) (resp *CreateResp, err error) {
 	resp.TransactionId, idx = readTransactionId(bytes, idx)
 	resp.ZxId, idx = readZxId(bytes, idx)
 	resp.Error, idx = readError(bytes, idx)
-	if resp.Error == EC_OK {
+	if resp.Error == EcOk {
 		resp.Path, idx = readPath(bytes, idx)
 	}
 	return resp, nil
@@ -30,7 +30,7 @@ func DecodeCreateResp(bytes []byte) (resp *CreateResp, err error) {
 func (c *CreateResp) BytesLength() int {
 	length := 0
 	length += LenTransactionId + LenZxId + LenError
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		length += StrLen(c.Path)
 	}
 	return length
@@ -42,7 +42,7 @@ func (c *CreateResp) Bytes() []byte {
 	idx = putTransactionId(bytes, idx, c.TransactionId)
 	idx = putZxId(bytes, idx, c.ZxId)
 	idx = putError(bytes, idx, c.Error)
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		idx = putPath(bytes, idx, c.Path)
 	}
 	return bytes

@@ -21,7 +21,7 @@ func DecodeExistsResp(bytes []byte) (resp *ExistsResp, err error) {
 	resp.TransactionId, idx = readTransactionId(bytes, idx)
 	resp.ZxId, idx = readZxId(bytes, idx)
 	resp.Error, idx = readError(bytes, idx)
-	if resp.Error == EC_OK {
+	if resp.Error == EcOk {
 		resp.Stat, idx = readStat(bytes, idx)
 	}
 	return resp, nil
@@ -30,7 +30,7 @@ func DecodeExistsResp(bytes []byte) (resp *ExistsResp, err error) {
 func (c *ExistsResp) BytesLength() int {
 	length := 0
 	length += LenTransactionId + LenZxId + LenError
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		length += c.Stat.BytesLength()
 	}
 	return length
@@ -42,7 +42,7 @@ func (c *ExistsResp) Bytes() []byte {
 	idx = putTransactionId(bytes, idx, c.TransactionId)
 	idx = putZxId(bytes, idx, c.ZxId)
 	idx = putError(bytes, idx, c.Error)
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		idx = putStat(bytes, idx, c.Stat)
 	}
 	return bytes

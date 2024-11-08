@@ -20,7 +20,7 @@ func DecodeDeleteResp(bytes []byte) (resp *DeleteResp, err error) {
 	resp.TransactionId, idx = readTransactionId(bytes, idx)
 	resp.ZxId, idx = readZxId(bytes, idx)
 	resp.Error, idx = readError(bytes, idx)
-	if resp.Error == EC_OK {
+	if resp.Error == EcOk {
 	}
 	return resp, nil
 }
@@ -28,7 +28,7 @@ func DecodeDeleteResp(bytes []byte) (resp *DeleteResp, err error) {
 func (c *DeleteResp) BytesLength() int {
 	length := 0
 	length += LenTransactionId + LenZxId + LenError
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 	}
 	return length
 }
@@ -39,7 +39,7 @@ func (c *DeleteResp) Bytes() []byte {
 	idx = putTransactionId(bytes, idx, c.TransactionId)
 	idx = putZxId(bytes, idx, c.ZxId)
 	idx = putError(bytes, idx, c.Error)
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 	}
 	return bytes
 }

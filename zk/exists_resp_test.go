@@ -12,7 +12,7 @@ func TestDecodeExistsResp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(31), resp.ZxId)
-	assert.Equal(t, EC_OK, resp.Error)
+	assert.Equal(t, EcOk, resp.Error)
 	assert.Equal(t, int64(28), resp.Stat.CreatedZxId)
 	assert.Equal(t, int64(29), resp.Stat.LastModifiedZxId)
 	assert.Equal(t, int64(1661856079977), resp.Stat.Created)
@@ -30,7 +30,7 @@ func TestEncodeExistsResp(t *testing.T) {
 	resp := &ExistsResp{
 		TransactionId: 1,
 		ZxId:          31,
-		Error:         EC_OK,
+		Error:         EcOk,
 		Stat: &Stat{
 			CreatedZxId:              28,
 			LastModifiedZxId:         29,
@@ -55,14 +55,14 @@ func TestDecodeExistsRespNoNodeExist(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(27), resp.ZxId)
-	assert.Equal(t, EC_NoNodeError, resp.Error)
+	assert.Equal(t, EcNoNode, resp.Error)
 }
 
 func TestEncodeExistsRespNoNodeExist(t *testing.T) {
 	resp := &ExistsResp{
 		TransactionId: 1,
 		ZxId:          27,
-		Error:         EC_NoNodeError,
+		Error:         EcNoNode,
 	}
 	bytes := resp.Bytes()
 	assert.Equal(t, hex2Bytes(t, "00000001000000000000001bffffff9b"), bytes)

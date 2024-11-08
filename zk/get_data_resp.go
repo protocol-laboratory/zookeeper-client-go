@@ -22,7 +22,7 @@ func DecodeGetDataResp(bytes []byte) (resp *GetDataResp, err error) {
 	resp.TransactionId, idx = readTransactionId(bytes, idx)
 	resp.ZxId, idx = readZxId(bytes, idx)
 	resp.Error, idx = readError(bytes, idx)
-	if resp.Error == EC_OK {
+	if resp.Error == EcOk {
 		resp.Data, idx = readData(bytes, idx)
 		resp.Stat, idx = readStat(bytes, idx)
 	}
@@ -32,7 +32,7 @@ func DecodeGetDataResp(bytes []byte) (resp *GetDataResp, err error) {
 func (c *GetDataResp) BytesLength() int {
 	length := 0
 	length += LenTransactionId + LenZxId + LenError
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		length += BytesLen(c.Data)
 		length += c.Stat.BytesLength()
 	}
@@ -45,7 +45,7 @@ func (c *GetDataResp) Bytes() []byte {
 	idx = putTransactionId(bytes, idx, c.TransactionId)
 	idx = putZxId(bytes, idx, c.ZxId)
 	idx = putError(bytes, idx, c.Error)
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		idx = putData(bytes, idx, c.Data)
 		idx = putStat(bytes, idx, c.Stat)
 	}

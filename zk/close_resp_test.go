@@ -12,7 +12,7 @@ func TestDecodeCloseResp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(3), resp.TransactionId)
 	assert.Equal(t, int64(7), resp.ZxId)
-	assert.Equal(t, EC_OK, resp.Error)
+	assert.Equal(t, EcOk, resp.Error)
 }
 
 func TestEncodeCloseResp(t *testing.T) {
