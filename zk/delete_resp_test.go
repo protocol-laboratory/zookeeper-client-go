@@ -12,14 +12,14 @@ func TestDecodeDeleteResp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(2), resp.TransactionId)
 	assert.Equal(t, int64(38), resp.ZxId)
-	assert.Equal(t, EC_OK, resp.Error)
+	assert.Equal(t, EcOk, resp.Error)
 }
 
 func TestEncodeDeleteResp(t *testing.T) {
 	resp := &DeleteResp{
 		TransactionId: 2,
 		ZxId:          38,
-		Error:         EC_OK,
+		Error:         EcOk,
 	}
 	bytes := resp.Bytes()
 	assert.Equal(t, hex2Bytes(t, "00000002000000000000002600000000"), bytes)
@@ -31,14 +31,14 @@ func TestDecodeDeleteRespNoNodeExist(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), resp.TransactionId)
 	assert.Equal(t, int64(37), resp.ZxId)
-	assert.Equal(t, EC_NoNodeError, resp.Error)
+	assert.Equal(t, EcNoNode, resp.Error)
 }
 
 func TestEncodeDeleteRespNoNodeExist(t *testing.T) {
 	resp := &DeleteResp{
 		TransactionId: 1,
 		ZxId:          37,
-		Error:         EC_NoNodeError,
+		Error:         EcNoNode,
 	}
 	bytes := resp.Bytes()
 	assert.Equal(t, hex2Bytes(t, "000000010000000000000025ffffff9b"), bytes)

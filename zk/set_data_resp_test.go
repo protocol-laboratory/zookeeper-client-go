@@ -12,7 +12,7 @@ func TestDecodeSetDataResp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(2), resp.TransactionId)
 	assert.Equal(t, int64(6), resp.ZxId)
-	assert.Equal(t, EC_OK, resp.Error)
+	assert.Equal(t, EcOk, resp.Error)
 	assert.Equal(t, int64(5), resp.Stat.CreatedZxId)
 	assert.Equal(t, int64(6), resp.Stat.LastModifiedZxId)
 	assert.Equal(t, int64(1661818590111), resp.Stat.Created)

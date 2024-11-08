@@ -21,7 +21,7 @@ func DecodeGetChildrenResp(bytes []byte) (resp *GetChildrenResp, err error) {
 	resp.TransactionId, idx = readTransactionId(bytes, idx)
 	resp.ZxId, idx = readZxId(bytes, idx)
 	resp.Error, idx = readError(bytes, idx)
-	if resp.Error == EC_OK {
+	if resp.Error == EcOk {
 		var length int
 		length, idx = readInt(bytes, idx)
 		for i := 0; i < length; i++ {
@@ -36,7 +36,7 @@ func DecodeGetChildrenResp(bytes []byte) (resp *GetChildrenResp, err error) {
 func (c *GetChildrenResp) BytesLength() int {
 	length := 0
 	length += LenTransactionId + LenZxId + LenError
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		length += LenArray
 		for _, child := range c.Children {
 			length += StrLen(child)
@@ -51,7 +51,7 @@ func (c *GetChildrenResp) Bytes() []byte {
 	idx = putTransactionId(bytes, idx, c.TransactionId)
 	idx = putZxId(bytes, idx, c.ZxId)
 	idx = putError(bytes, idx, c.Error)
-	if c.Error == EC_OK {
+	if c.Error == EcOk {
 		idx = putInt(bytes, idx, len(c.Children))
 		for _, child := range c.Children {
 			idx = putString(bytes, idx, child)
