@@ -262,6 +262,12 @@ func (c *ProtocolClient) Close() {
 		_ = c.conn.Close()
 		close(c.eventsChan)
 		close(c.pendingQueue)
+		for req := range c.eventsChan {
+			req.callback(nil, ErrClientClosed)
+		}
+		for req := range c.pendingQueue {
+			req.callback(nil, ErrClientClosed)
+		}
 	})
 }
 
