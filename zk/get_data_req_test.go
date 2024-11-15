@@ -11,7 +11,7 @@ func TestDecodeGetDataReq(t *testing.T) {
 	req, err := DecodeGetDataReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, int32(3), req.TransactionId)
-	assert.Equal(t, OP_GET_DATA, req.OpCode)
+	assert.Equal(t, OpGetData, req.OpCode)
 	assert.Equal(t, "/zk-test", req.Path)
 	assert.False(t, req.Watch)
 }
@@ -19,7 +19,7 @@ func TestDecodeGetDataReq(t *testing.T) {
 func TestEncodeGetDataReq(t *testing.T) {
 	req := &GetDataReq{
 		TransactionId: 3,
-		OpCode:        OP_GET_DATA,
+		OpCode:        OpGetData,
 		Path:          "/zk-test",
 		Watch:         false,
 	}

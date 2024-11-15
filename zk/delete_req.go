@@ -41,7 +41,7 @@ func (e *DeleteReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, e.TransactionId)
-	idx = putOpCode(bytes, idx, OP_DELETE)
+	idx = putOpCode(bytes, idx, OpDelete)
 	idx = putPath(bytes, idx, e.Path)
 	idx = putVersion(bytes, idx, e.Version)
 	return bytes

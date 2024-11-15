@@ -41,7 +41,7 @@ func (g *GetChildrenReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, g.TransactionId)
-	idx = putOpCode(bytes, idx, OP_GET_CHILDREN)
+	idx = putOpCode(bytes, idx, OpGetChildren)
 	idx = putPath(bytes, idx, g.Path)
 	idx = putWatch(bytes, idx, g.Watch)
 	return bytes

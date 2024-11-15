@@ -89,7 +89,7 @@ func TestProtocolClientConnectPing(t *testing.T) {
 	assert.NotNil(t, resp)
 	pingReq := &PingReq{
 		TransactionId: -2,
-		OpCode:        OP_PING,
+		OpCode:        OpPing,
 	}
 	pingResp, err := client.Ping(pingReq)
 	require.Nil(t, err)

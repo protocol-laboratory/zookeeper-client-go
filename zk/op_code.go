@@ -3,44 +3,38 @@ package zk
 type OpCode int32
 
 const (
-	OP_ERROR          OpCode = -1
-	OP_CREATE_SESSION OpCode = -10
-	OP_CLOSE_SESSION  OpCode = -11
-)
-
-const (
-	OP_NOTIFICATION OpCode = iota
-	OP_CREATE
-	OP_DELETE
-	OP_EXISTS
-	OP_GET_DATA
-	OP_SET_DATA
-	OP_GET_ACL
-	OP_SET_ACL
-	OP_GET_CHILDREN
-	OP_SYNC
-	OP_DUMMY_10
-	OP_PING
-	OP_GET_CHILDREN2
-	OP_CHECK
-	OP_MULTI
-	OP_CREATE2
-	OP_RECONFIG
-	OP_CHECK_WATCHES
-	OP_REMOVE_WATCHES
-	OP_CREATE_CONTAINER
-	OP_DELETE_CONTAINER
-	OP_CREATE_TTL
-	OP_MULTI_READ
-)
-
-const (
-	OP_AUTH OpCode = iota + 100
-	OP_SET_WATCHES
-	OP_SASL
-	OP_GET_EPHEMERALS
-	OP_GET_ALL_CHILDREN_NUMBER
-	OP_SET_WATCHES2
-	OP_ADD_WATCH
-	OP_WHO_AM_I
+	OpCloseSession         OpCode = -11
+	OpCreateSession        OpCode = -10
+	OpError                OpCode = -1
+	OpNotification         OpCode = 0
+	OpCreate               OpCode = 1
+	OpDelete               OpCode = 2
+	OpExists               OpCode = 3
+	OpGetData              OpCode = 4
+	OpSetData              OpCode = 5
+	OpGetAcl               OpCode = 6
+	OpSetAcl               OpCode = 7
+	OpGetChildren          OpCode = 8
+	OpSync                 OpCode = 9
+	OpDummy10              OpCode = 10
+	OpPing                 OpCode = 11
+	OpGetChildren2         OpCode = 12
+	OpCheck                OpCode = 13
+	OpMulti                OpCode = 14
+	OpCreate2              OpCode = 15
+	OpReconfig             OpCode = 16
+	OpCheckWatches         OpCode = 17
+	OpRemoveWatches        OpCode = 18
+	OpCreateContainer      OpCode = 19
+	OpDeleteContainer      OpCode = 20
+	OpCreateTtl            OpCode = 21
+	OpMultiRead            OpCode = 22
+	OpAuth                 OpCode = 100
+	OpSetWatches           OpCode = 101
+	OpSasl                 OpCode = 102
+	OpGetEphemerals        OpCode = 103
+	OpGetAllChildrenNumber OpCode = 104
+	OpSetWatches2          OpCode = 105
+	OpAddWatch             OpCode = 106
+	OpWhoAmI               OpCode = 107
 )

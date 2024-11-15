@@ -11,7 +11,7 @@ func TestDecodeDeleteReq(t *testing.T) {
 	req, err := DecodeDeleteReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), req.TransactionId)
-	assert.Equal(t, OP_DELETE, req.OpCode)
+	assert.Equal(t, OpDelete, req.OpCode)
 	assert.Equal(t, "/zk-notfound", req.Path)
 	assert.Equal(t, 0, req.Version)
 }
@@ -19,7 +19,7 @@ func TestDecodeDeleteReq(t *testing.T) {
 func TestEncodeDeleteReq(t *testing.T) {
 	req := &DeleteReq{
 		TransactionId: 1,
-		OpCode:        OP_DELETE,
+		OpCode:        OpDelete,
 		Path:          "/zk-notfound",
 		Version:       0,
 	}

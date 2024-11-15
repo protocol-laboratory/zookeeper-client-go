@@ -41,7 +41,7 @@ func (e *ExistsReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, e.TransactionId)
-	idx = putOpCode(bytes, idx, OP_EXISTS)
+	idx = putOpCode(bytes, idx, OpExists)
 	idx = putPath(bytes, idx, e.Path)
 	idx = putWatch(bytes, idx, e.Watch)
 	return bytes

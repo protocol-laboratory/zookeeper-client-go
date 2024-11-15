@@ -147,7 +147,7 @@ func (c *ProtocolClient) StartHeartbeat(timeout time.Duration) {
 			case <-ticker.C:
 				_, _ = c.Ping(&PingReq{
 					TransactionId: -2,
-					OpCode:        OP_PING,
+					OpCode:        OpPing,
 				})
 			case <-c.ctx.Done():
 				return

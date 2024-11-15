@@ -37,6 +37,6 @@ func (c *CloseReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, c.TransactionId)
-	idx = putOpCode(bytes, idx, OP_CLOSE_SESSION)
+	idx = putOpCode(bytes, idx, OpCloseSession)
 	return bytes
 }

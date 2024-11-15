@@ -11,7 +11,7 @@ func TestDecodeGetChildrenReq(t *testing.T) {
 	req, err := DecodeGetChildrenReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), req.TransactionId)
-	assert.Equal(t, OP_GET_CHILDREN, req.OpCode)
+	assert.Equal(t, OpGetChildren, req.OpCode)
 	assert.Equal(t, "/", req.Path)
 	assert.False(t, req.Watch)
 }
@@ -19,7 +19,7 @@ func TestDecodeGetChildrenReq(t *testing.T) {
 func TestEncodeGetChildrenReq(t *testing.T) {
 	req := &GetChildrenReq{
 		TransactionId: 1,
-		OpCode:        OP_GET_CHILDREN,
+		OpCode:        OpGetChildren,
 		Path:          "/",
 		Watch:         false,
 	}
