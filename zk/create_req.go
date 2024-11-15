@@ -57,7 +57,7 @@ func (c *CreateReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, c.TransactionId)
-	idx = putOpCode(bytes, idx, OP_CREATE)
+	idx = putOpCode(bytes, idx, OpCreate)
 	idx = putPath(bytes, idx, c.Path)
 	idx = putData(bytes, idx, c.Data)
 	idx = putInt(bytes, idx, len(c.Permissions))

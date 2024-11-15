@@ -37,7 +37,7 @@ func (c *Client) Create(path string, data []byte, permissions []int, scheme stri
 
 	req := &CreateReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_CREATE
+	req.OpCode = OpCreate
 	req.Path = path
 	req.Data = data
 	req.Permissions = permissions
@@ -53,7 +53,7 @@ func (c *Client) Delete(path string, version int) (*DeleteResp, error) {
 
 	req := &DeleteReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_DELETE
+	req.OpCode = OpDelete
 	req.Path = path
 	req.Version = version
 	return c.client.Delete(req)
@@ -65,7 +65,7 @@ func (c *Client) Exists(path string) (*ExistsResp, error) {
 
 	req := &ExistsReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_EXISTS
+	req.OpCode = OpExists
 	req.Path = path
 	req.Watch = false
 	return c.client.Exists(req)
@@ -77,7 +77,7 @@ func (c *Client) GetData(path string) (*GetDataResp, error) {
 
 	req := &GetDataReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_GET_DATA
+	req.OpCode = OpGetData
 	req.Path = path
 	req.Watch = false
 	return c.client.GetData(req)
@@ -89,7 +89,7 @@ func (c *Client) SetData(path string, data []byte, version int) (*SetDataResp, e
 
 	req := &SetDataReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_SET_DATA
+	req.OpCode = OpSetData
 	req.Path = path
 	req.Data = data
 	req.Version = version
@@ -102,7 +102,7 @@ func (c *Client) GetChildren(path string) (*GetChildrenResp, error) {
 
 	req := &GetChildrenReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_GET_CHILDREN
+	req.OpCode = OpGetChildren
 	req.Path = path
 	req.Watch = false
 	return c.client.GetChildren(req)
@@ -114,7 +114,7 @@ func (c *Client) CloseSession() (*CloseResp, error) {
 
 	req := &CloseReq{}
 	req.TransactionId = c.nextTransactionId()
-	req.OpCode = OP_CLOSE_SESSION
+	req.OpCode = OpCloseSession
 	return c.client.CloseSession(req)
 }
 

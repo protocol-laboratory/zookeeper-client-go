@@ -37,6 +37,6 @@ func (p *PingReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, p.TransactionId)
-	idx = putOpCode(bytes, idx, OP_PING)
+	idx = putOpCode(bytes, idx, OpPing)
 	return bytes
 }

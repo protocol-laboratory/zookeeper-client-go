@@ -11,7 +11,7 @@ func TestDecodeExistsReq(t *testing.T) {
 	req, err := DecodeExistsReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), req.TransactionId)
-	assert.Equal(t, OP_EXISTS, req.OpCode)
+	assert.Equal(t, OpExists, req.OpCode)
 	assert.Equal(t, "/exist-test", req.Path)
 	assert.False(t, req.Watch)
 }
@@ -19,7 +19,7 @@ func TestDecodeExistsReq(t *testing.T) {
 func TestEncodeExistsReq(t *testing.T) {
 	req := &ExistsReq{
 		TransactionId: 1,
-		OpCode:        OP_EXISTS,
+		OpCode:        OpExists,
 		Path:          "/exist-test",
 		Watch:         false,
 	}

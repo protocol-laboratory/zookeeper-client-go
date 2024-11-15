@@ -11,5 +11,5 @@ func TestDecodePingReq(t *testing.T) {
 	req, err := DecodePingReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, int32(-2), req.TransactionId)
-	assert.Equal(t, OP_PING, req.OpCode)
+	assert.Equal(t, OpPing, req.OpCode)
 }

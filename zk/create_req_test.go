@@ -11,7 +11,7 @@ func TestDecodeCreateReq(t *testing.T) {
 	req, err := DecodeCreateReq(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, int32(1), req.TransactionId)
-	assert.Equal(t, OP_CREATE, req.OpCode)
+	assert.Equal(t, OpCreate, req.OpCode)
 	assert.Equal(t, "/zk-test", req.Path)
 	assert.Equal(t, []byte("hello"), req.Data)
 	assert.Len(t, req.Permissions, 1)
@@ -24,7 +24,7 @@ func TestDecodeCreateReq(t *testing.T) {
 func TestEncodeCreateReq(t *testing.T) {
 	req := &CreateReq{
 		TransactionId: 1,
-		OpCode:        OP_CREATE,
+		OpCode:        OpCreate,
 		Path:          "/zk-test",
 		Data:          []byte("hello"),
 		Permissions:   []int{31},

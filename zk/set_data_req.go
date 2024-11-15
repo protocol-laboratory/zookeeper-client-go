@@ -43,7 +43,7 @@ func (s *SetDataReq) Bytes(containLen bool) []byte {
 		idx = putInt(bytes, idx, len(bytes)-4)
 	}
 	idx = putTransactionId(bytes, idx, s.TransactionId)
-	idx = putOpCode(bytes, idx, OP_SET_DATA)
+	idx = putOpCode(bytes, idx, OpSetData)
 	idx = putPath(bytes, idx, s.Path)
 	idx = putData(bytes, idx, s.Data)
 	idx = putVersion(bytes, idx, s.Version)
