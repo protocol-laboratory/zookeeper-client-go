@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/libgox/addr"
+	"golang.org/x/exp/slog"
 )
 
 type Config struct {
@@ -17,6 +18,8 @@ type Config struct {
 	BufferMax        int
 	Timeout          time.Duration
 	TlsConfig        *tls.Config
+	// Logger structured logger for logging operations
+	Logger *slog.Logger
 }
 
 type Client struct {
@@ -29,6 +32,8 @@ type Client struct {
 
 	reconnectCh              chan time.Time
 	lastClientConnectSuccess atomic.Value
+
+	logger *slog.Logger
 }
 
 func (c *Client) Create(path string, data []byte, permissions []int, scheme string, credentials string, flags int) (*CreateResp, error) {
@@ -144,8 +149,10 @@ func (c *Client) reconnect() {
 
 		// Create a new client
 		selectedAddress := c.config.Addresses[rand.Intn(len(c.config.Addresses))]
+		c.logger.Info("reconnecting to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
 		newClient, err := NewProtocolClient(selectedAddress, c.config, c.reconnectCh)
 		if err != nil {
+			c.logger.Error("failed to dial with zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()), slog.Any("err", err))
 			c.mutex.Unlock()
 			continue
 		}
@@ -159,6 +166,7 @@ func (c *Client) reconnect() {
 			ReadOnly:        false,
 		})
 		if err != nil {
+			c.logger.Error("failed to connect to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()), slog.Any("err", err))
 			c.mutex.Unlock()
 			newClient.Close()
 			continue
@@ -167,6 +175,8 @@ func (c *Client) reconnect() {
 		// Replace with the new client
 		c.client = newClient
 		c.mutex.Unlock()
+		c.logger.Info("reconnected to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
+		c.lastClientConnectSuccess.Store(time.Now())
 	}
 }
 
@@ -183,11 +193,15 @@ func NewClient(config *Config) (*Client, error) {
 	if config.Timeout <= 0 {
 		config.Timeout = 30 * time.Second
 	}
+	if config.Logger == nil {
+		config.Logger = slog.Default()
+	}
 
 	client := &Client{
 		config:      config,
 		reconnectCh: make(chan time.Time),
 	}
+	client.logger = config.Logger
 
 	selectedAddress := config.Addresses[rand.Intn(len(config.Addresses))]
 
