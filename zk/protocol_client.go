@@ -10,6 +10,7 @@ import (
 
 	"github.com/libgox/addr"
 	"github.com/libgox/buffer"
+	"golang.org/x/exp/slog"
 )
 
 type sendRequest struct {
@@ -27,6 +28,8 @@ type ProtocolClient struct {
 	ctxCancel    context.CancelFunc
 	closeOnce    sync.Once
 	reconnectCh  chan time.Time
+	// logger structured logger for logging operations
+	logger *slog.Logger
 }
 
 func (c *ProtocolClient) Connect(req *ConnectReq) (*ConnectResp, error) {
@@ -277,7 +280,7 @@ func NewProtocolClient(address addr.Address, config *Config, reconnectCh chan ti
 	if config.TlsConfig != nil {
 		conn, err = tls.Dial("tcp", address.Addr(), config.TlsConfig)
 	} else {
-		conn, err = net.Dial("tcp", address.Addr())
+		conn, err = net.DialTimeout("tcp", address.Addr(), config.Timeout)
 	}
 
 	if err != nil {
@@ -293,6 +296,7 @@ func NewProtocolClient(address addr.Address, config *Config, reconnectCh chan ti
 		ctx:          ctx,
 		ctxCancel:    cancel,
 		reconnectCh:  reconnectCh,
+		logger:       config.Logger,
 	}
 	go func() {
 		client.read()
