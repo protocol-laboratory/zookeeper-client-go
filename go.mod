@@ -1,6 +1,6 @@
 module github.com/protocol-laboratory/zookeeper-client-go
 
-go 1.19
+go 1.20
 
 require (
 	github.com/libgox/addr v0.2.0
