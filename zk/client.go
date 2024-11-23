@@ -2,7 +2,9 @@ package zk
 
 import (
 	"crypto/tls"
+	"fmt"
 	"math/rand"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -32,6 +34,8 @@ type Client struct {
 
 	reconnectCh              chan time.Time
 	lastClientConnectSuccess atomic.Value
+
+	closeOnce sync.Once
 
 	logger *slog.Logger
 }
@@ -128,55 +132,68 @@ func (c *Client) nextTransactionId() int32 {
 }
 
 func (c *Client) Close() {
-	close(c.reconnectCh)
-	c.client.Close()
+	c.closeOnce.Do(func() {
+		close(c.reconnectCh)
+		c.client.Close()
+	})
 }
 
 func (c *Client) reconnect() {
 	for timestamp := range c.reconnectCh {
-		lastConnect, ok := c.lastClientConnectSuccess.Load().(time.Time)
-		if ok {
-			if timestamp.Sub(lastConnect) < 0 {
-				continue
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					var buf [4096]byte
+					n := runtime.Stack(buf[:], false)
+					stackInfo := string(buf[:n])
+					c.logger.Error(fmt.Sprintf("%v cause panic, stack: %s", r, stackInfo))
+				}
+			}()
+
+			lastConnect, ok := c.lastClientConnectSuccess.Load().(time.Time)
+			if ok {
+				if timestamp.Sub(lastConnect) < 0 {
+					return
+				}
 			}
-		}
 
-		c.mutex.Lock()
-		// Close the old client if needed
-		if c.client != nil {
-			c.client.Close()
-		}
+			c.mutex.Lock()
+			// Close the old client if needed
+			if c.client != nil {
+				c.client.Close()
+			}
 
-		// Create a new client
-		selectedAddress := c.config.Addresses[rand.Intn(len(c.config.Addresses))]
-		c.logger.Info("reconnecting to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
-		newClient, err := NewProtocolClient(selectedAddress, c.config, c.reconnectCh)
-		if err != nil {
-			c.logger.Error("failed to dial with zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()), slog.Any("err", err))
+			// Create a new client
+			selectedAddress := c.config.Addresses[rand.Intn(len(c.config.Addresses))]
+			c.logger.Info("reconnecting to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
+			newClient, err := NewProtocolClient(selectedAddress, c.config, c.reconnectCh)
+			if err != nil {
+				c.logger.Error("failed to dial with zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()), slog.Any("err", err))
+				c.mutex.Unlock()
+				return
+			}
+
+			_, err = newClient.Connect(&ConnectReq{
+				ProtocolVersion: 0,
+				LastZxidSeen:    0,
+				Timeout:         int(c.config.Timeout.Milliseconds()),
+				SessionId:       0,
+				Password:        PasswordEmpty,
+				ReadOnly:        false,
+			})
+			if err != nil {
+				c.logger.Error("failed to connect to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()), slog.Any("err", err))
+				c.mutex.Unlock()
+				newClient.Close()
+				return
+			}
+
+			// Replace with the new client
+			c.client = newClient
 			c.mutex.Unlock()
-			continue
-		}
-
-		_, err = newClient.Connect(&ConnectReq{
-			ProtocolVersion: 0,
-			LastZxidSeen:    0,
-			Timeout:         int(c.config.Timeout.Milliseconds()),
-			SessionId:       0,
-			Password:        PasswordEmpty,
-			ReadOnly:        false,
-		})
-		if err != nil {
-			c.logger.Error("failed to connect to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()), slog.Any("err", err))
-			c.mutex.Unlock()
-			newClient.Close()
-			continue
-		}
-
-		// Replace with the new client
-		c.client = newClient
-		c.mutex.Unlock()
-		c.logger.Info("reconnected to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
-		c.lastClientConnectSuccess.Store(time.Now())
+			c.logger.Info("reconnected to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
+			c.lastClientConnectSuccess.Store(time.Now())
+		}()
 	}
 }
 

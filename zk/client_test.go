@@ -28,3 +28,18 @@ func TestClientGetChildrenData(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, getDataResp)
 }
+
+func TestClientDoubleClose(t *testing.T) {
+	config := &Config{
+		Addresses: []addr.Address{
+			{
+				Host: "localhost",
+				Port: 2181,
+			},
+		},
+	}
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.Close()
+	client.Close()
+}
