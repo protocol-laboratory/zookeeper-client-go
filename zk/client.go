@@ -190,9 +190,9 @@ func (c *Client) reconnect() {
 
 			// Replace with the new client
 			c.client = newClient
+			c.lastClientConnectSuccess.Store(time.Now())
 			c.mutex.Unlock()
 			c.logger.Info("reconnected to zookeeper", slog.String(LogKeyAddr, selectedAddress.Addr()))
-			c.lastClientConnectSuccess.Store(time.Now())
 		}()
 	}
 }
