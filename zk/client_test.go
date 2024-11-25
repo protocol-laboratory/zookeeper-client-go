@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/libgox/addr"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
