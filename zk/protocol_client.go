@@ -148,10 +148,13 @@ func (c *ProtocolClient) StartHeartbeat(timeout time.Duration) {
 		for {
 			select {
 			case <-ticker.C:
-				_, _ = c.Ping(&PingReq{
+				_, err := c.Ping(&PingReq{
 					TransactionId: -2,
 					OpCode:        OpPing,
 				})
+				if err != nil {
+					c.logger.Error("ping failed", slog.Any("err", err))
+				}
 			case <-c.ctx.Done():
 				return
 			}
