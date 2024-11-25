@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"runtime"
 	"sync"
 	"time"
 
@@ -143,6 +144,15 @@ func (c *ProtocolClient) CloseSession(req *CloseReq) (*CloseResp, error) {
 
 func (c *ProtocolClient) StartHeartbeat(timeout time.Duration) {
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				var buf [4096]byte
+				n := runtime.Stack(buf[:], false)
+				stackInfo := string(buf[:n])
+				c.logger.Error(fmt.Sprintf("%v cause zookeeper protocol client ping panic, stack: %s", r, stackInfo))
+				c.close()
+			}
+		}()
 		ticker := time.NewTicker(timeout / 3)
 		defer ticker.Stop()
 		for {
