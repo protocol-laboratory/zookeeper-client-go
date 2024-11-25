@@ -146,7 +146,7 @@ func (c *Client) reconnect() {
 					var buf [4096]byte
 					n := runtime.Stack(buf[:], false)
 					stackInfo := string(buf[:n])
-					c.logger.Error(fmt.Sprintf("%v cause panic, stack: %s", r, stackInfo))
+					c.logger.Error(fmt.Sprintf("%v cause zookeeper client reconnect panic, stack: %s", r, stackInfo))
 				}
 			}()
 
