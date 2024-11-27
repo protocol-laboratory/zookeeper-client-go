@@ -139,6 +139,7 @@ func (c *Client) Close() {
 }
 
 func (c *Client) reconnect() {
+	lastProcessReconnectTimestamp := time.Unix(0, 0)
 	for timestamp := range c.reconnectCh {
 		func() {
 			defer func() {
@@ -149,6 +150,14 @@ func (c *Client) reconnect() {
 					c.logger.Error(fmt.Sprintf("%v cause zookeeper client reconnect panic, stack: %s", r, stackInfo))
 				}
 			}()
+
+			defer func() {
+				lastProcessReconnectTimestamp = time.Now()
+			}()
+
+			if timestamp.Sub(lastProcessReconnectTimestamp) < 0 {
+				return
+			}
 
 			lastConnect, ok := c.lastClientConnectSuccess.Load().(time.Time)
 			if ok {
