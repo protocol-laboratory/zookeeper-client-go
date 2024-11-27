@@ -42,3 +42,19 @@ func TestClientDoubleClose(t *testing.T) {
 	client.Close()
 	client.Close()
 }
+
+func TestClientSendReqAfterProtocolClientCloseNoDeadLock(t *testing.T) {
+	config := &Config{
+		Addresses: []addr.Address{
+			{
+				Host: "localhost",
+				Port: 2181,
+			},
+		},
+	}
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.client.Close()
+	_, err = client.GetChildren("/")
+	_, err = client.GetData("/zookeeper")
+}
