@@ -42,8 +42,6 @@ type Client struct {
 
 func (c *Client) Create(path string, data []byte, permissions []int, scheme string, credentials string, flags int) (*CreateResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &CreateReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpCreate
@@ -53,78 +51,80 @@ func (c *Client) Create(path string, data []byte, permissions []int, scheme stri
 	req.Scheme = scheme
 	req.Credentials = credentials
 	req.Flags = flags
-	return c.client.Create(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.Create(req)
 }
 
 func (c *Client) Delete(path string, version int) (*DeleteResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &DeleteReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpDelete
 	req.Path = path
 	req.Version = version
-	return c.client.Delete(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.Delete(req)
 }
 
 func (c *Client) Exists(path string) (*ExistsResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &ExistsReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpExists
 	req.Path = path
 	req.Watch = false
-	return c.client.Exists(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.Exists(req)
 }
 
 func (c *Client) GetData(path string) (*GetDataResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &GetDataReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpGetData
 	req.Path = path
 	req.Watch = false
-	return c.client.GetData(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.GetData(req)
 }
 
 func (c *Client) SetData(path string, data []byte, version int) (*SetDataResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &SetDataReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpSetData
 	req.Path = path
 	req.Data = data
 	req.Version = version
-	return c.client.SetData(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.SetData(req)
 }
 
 func (c *Client) GetChildren(path string) (*GetChildrenResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &GetChildrenReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpGetChildren
 	req.Path = path
 	req.Watch = false
-	return c.client.GetChildren(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.GetChildren(req)
 }
 
 func (c *Client) CloseSession() (*CloseResp, error) {
 	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
 	req := &CloseReq{}
 	req.TransactionId = c.nextTransactionId()
 	req.OpCode = OpCloseSession
-	return c.client.CloseSession(req)
+	protocolClient := c.client
+	c.mutex.RUnlock()
+	return protocolClient.CloseSession(req)
 }
 
 func (c *Client) nextTransactionId() int32 {
