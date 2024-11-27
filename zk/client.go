@@ -225,7 +225,7 @@ func NewClient(config *Config) (*Client, error) {
 
 	client := &Client{
 		config:      config,
-		reconnectCh: make(chan time.Time),
+		reconnectCh: make(chan time.Time, 1024),
 	}
 	client.logger = config.Logger
 
