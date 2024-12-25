@@ -3,6 +3,7 @@ package zk
 import (
 	"crypto/tls"
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"runtime"
 	"sync"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/libgox/addr"
-	"golang.org/x/exp/slog"
 )
 
 type Config struct {

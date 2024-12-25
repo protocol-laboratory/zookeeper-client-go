@@ -1,12 +1,12 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 	"time"
 
 	"github.com/libgox/addr"
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
-	"golang.org/x/exp/slog"
 )
 
 func main() {
