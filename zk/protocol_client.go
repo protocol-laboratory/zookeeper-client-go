@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log/slog"
 	"net"
 	"runtime"
 	"sync"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/libgox/addr"
 	"github.com/libgox/buffer"
-	"golang.org/x/exp/slog"
 )
 
 type sendRequest struct {

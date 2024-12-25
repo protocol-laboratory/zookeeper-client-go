@@ -9,7 +9,7 @@
 
 ## 📋 Requirements
 
-- Go 1.20+
+- Go 1.21+
 
 ## 🚀 Install
 
